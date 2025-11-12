@@ -159,7 +159,7 @@ class StockForecast(models.Model):
             rec.total_sold = total_sold
             rec.monthly_average = total_sold / rec.months_history if rec.months_history > 0 else 0
 
-    @api.depends('current_stock', 'incoming_stock', 'monthly_average')
+    @api.depends('current_stock', 'incoming_stock', 'monthly_average', 'forecast_months')
     def _compute_coverage_data(self):
         """
         Calcula la cobertura y la necesidad de pedido.
@@ -170,7 +170,7 @@ class StockForecast(models.Model):
                 rec.coverage_months = rec.total_available_stock / rec.monthly_average
             else:
                 rec.coverage_months = 999 if rec.total_available_stock > 0 else 0
-            rec.need_reorder = rec.coverage_months < 3
+            rec.need_reorder = rec.coverage_months < rec.forecast_months
 
     def action_refresh_stock_data(self):
         """
