@@ -76,6 +76,19 @@ class StockForecast(models.Model):
     )
 
     
+    @api.depends('current_stock', 'incoming_stock', 'monthly_average', 'forecast_months')
+    def _compute_coverage_data(self):
+        """
+        Calcula la cobertura y la necesidad de pedido.
+        """
+        for rec in self:
+            rec.total_available_stock = rec.current_stock + rec.incoming_stock
+            if rec.monthly_average > 0:
+                rec.coverage_months = rec.total_available_stock / rec.monthly_average
+            else:
+                rec.coverage_months = 999 if rec.total_available_stock > 0 else 0
+            rec.need_reorder = rec.coverage_months < rec.forecast_months
+
 
     @api.depends('product_id')
     def _compute_current_stock(self):
@@ -95,41 +108,56 @@ class StockForecast(models.Model):
         for rec in self:
             rec.current_stock = current_stock_map.get(rec.product_id.id, 0)
     
+    
+    
+    def _get_incoming_stock_domain(self):
+        """
+        Función auxiliar que CONSTRUYE el dominio (filtro) para el stock entrante.
+        Es usada tanto por _compute_incoming_stock como por action_view_incoming_stock_moves
+        para asegurar que la lógica es idéntica.
+        """
+        
+        self.ensure_one()
+        
+        if self.forecast_months <= 0 or not self.product_id:
+            
+            return [('id', '=', 0)]
+
+        # 1. Fecha de inicio: HOY a las 00:00:00
+        start_dt = fields.Datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+        # 2. Fecha de fin: La fecha de hoy + X meses
+        end_date = fields.Date.today() + timedelta(days=self.forecast_months * 30.44)
+        # 3. Convertir a datetime de FIN del día (23:59:59)
+        end_dt = fields.Datetime.to_datetime(end_date).replace(hour=23, minute=59, second=59)
+        
+        domain = [
+            ('product_id', '=', self.product_id.id),
+            ('state', 'in', ['assigned', 'confirmed', 'waiting', 'partially_available']),
+            ('picking_type_id.code', '=', 'incoming'),
+            
+            
+            ('picking_id.scheduled_date', '!=', False), 
+            ('picking_id.scheduled_date', '>=', start_dt), 
+            ('picking_id.scheduled_date', '<=', end_dt)
+        ]
+        return domain
+
+
+    
     @api.depends('product_id', 'forecast_months')
     def _compute_incoming_stock(self):
         """
         Calcula el stock entrante basado en los 'forecast_months'.
         """
         for rec in self:
-            if not rec.product_id:
+            
+            domain = rec._get_incoming_stock_domain()
+            
+            if domain == [('id', '=', 0)]:
                 rec.incoming_stock = 0
                 continue
-            
-            if rec.forecast_months <= 0:
-                rec.incoming_stock = 0
-                continue
-
-            
-            start_dt = fields.Datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-
-            
-            end_date = fields.Date.today() + timedelta(days=rec.forecast_months * 30.44)
-            
-            end_dt = fields.Datetime.to_datetime(end_date).replace(hour=23, minute=59, second=59)
-            
-            domain = [
-                ('product_id', '=', rec.product_id.id),
-                ('state', 'in', ['assigned', 'confirmed', 'waiting', 'partially_available']),
-                ('picking_type_id.code', '=', 'incoming'),
                 
-                
-                
-                
-                ('picking_id.scheduled_date', '!=', False), 
-                ('picking_id.scheduled_date', '>=', start_dt), 
-                ('picking_id.scheduled_date', '<=', end_dt)
-            ]
-            
             incoming_moves = self.env['stock.move'].search_read(domain, ['product_uom_qty'])
             rec.incoming_stock = sum(move['product_uom_qty'] for move in incoming_moves)
 
@@ -159,18 +187,28 @@ class StockForecast(models.Model):
             rec.total_sold = total_sold
             rec.monthly_average = total_sold / rec.months_history if rec.months_history > 0 else 0
 
-    @api.depends('current_stock', 'incoming_stock', 'monthly_average', 'forecast_months')
-    def _compute_coverage_data(self):
-        """
-        Calcula la cobertura y la necesidad de pedido.
-        """
-        for rec in self:
-            rec.total_available_stock = rec.current_stock + rec.incoming_stock
-            if rec.monthly_average > 0:
-                rec.coverage_months = rec.total_available_stock / rec.monthly_average
-            else:
-                rec.coverage_months = 999 if rec.total_available_stock > 0 else 0
-            rec.need_reorder = rec.coverage_months < rec.forecast_months
+    
+    # funcion del boton de la derecha de Stock Entrante
+    def action_view_incoming_stock_moves(self):
+       
+        self.ensure_one() 
+        
+        domain = self._get_incoming_stock_domain()
+        
+        
+        return {
+            'name': 'Movimientos Entrantes Previstos',
+            'type': 'ir.actions.act_window',
+            'res_model': 'stock.move', 
+            'view_mode': 'tree,form', 
+            'target': 'new', 
+            'domain': domain, 
+            'context': {
+                'search_default_group_by_picking': 1, # Agrupa por Albarán/Recepción
+                'search_default_group_by_product': 1,
+            }
+        }
+
 
     def action_refresh_stock_data(self):
         """
