@@ -7,12 +7,13 @@
             <tree editable="bottom" decoration-danger="need_reorder==True">
                 <field name="default_code" string="Referencia" readonly="1"/>
                 <field name="product_name" string="Descripción" readonly="1"/>
-                
                 <field name="months_history" string="Meses Hist."/>
-                
                 <field name="total_sold" string="Ventas" readonly="1"/>
                 <field name="monthly_average" string="Media Mes" readonly="1"/>
                 <field name="current_stock" string="Stock Mano" readonly="1"/>
+                
+                <field name="forecast_months" string="Meses Previsión"/>
+                
                 <field name="incoming_stock" string="Stock Entrante" readonly="1"/>
                 <field name="total_available_stock" string="Stock Total" readonly="1"/>
                 <field name="coverage_months" string="Meses Cobertura (Meses2)" readonly="1"/>
@@ -32,7 +33,8 @@
     <menuitem 
         id="menu_stock_forecast_main" 
         name="Previsión de Stock" 
-        parent="purchase.menu_purchase_root"  action="action_stock_forecast"
+        parent="purchase.menu_purchase_root"
+        action="action_stock_forecast"
         sequence="90"
     />
 
