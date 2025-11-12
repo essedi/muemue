@@ -5,6 +5,8 @@
         <field name="model">stock.forecast</field>
         <field name="arch" type="xml">
             <tree editable="bottom" decoration-danger="need_reorder==True">
+                <field name="need_reorder" readonly="1" invisible="1"/>
+
                 <field name="default_code" string="Referencia" readonly="1"/>
                 <field name="product_name" string="Descripción" readonly="1"/>
                 <field name="months_history" string="Meses Hist."/>
@@ -23,7 +25,6 @@
                 <field name="total_available_stock" string="Stock Total" readonly="1"/>
                 <field name="coverage_months" string="Meses Cobertura (Meses2)" readonly="1"/>
                 
-                <field name="need_reorder" readonly="1" invisible="1"/>
             </tree>
         </field>
     </record>
@@ -43,5 +44,18 @@
         action="action_stock_forecast"
         sequence="90"
     />
+
+    <record id="action_forecast_pedir" model="ir.actions.server">
+        <field name="name">Pedir</field>
+        <field name="model_id" ref="model_stock_forecast"/>
+        <field name="binding_model_id" ref="model_stock_forecast"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+# Aqui hay que ponerle la lógica, no hace nada aun.
+# model.action_hacer_pedido()
+pass
+        </field>
+    </record>
 
 </odoo>
