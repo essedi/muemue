@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_stock_forecast_wizard" model="ir.actions.act_window">
+        <field name="name">Poblar Previsión de Stock</field>
+        <field name="res_model">stock.forecast.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    
+    <record id="view_stock_forecast_wizard_form" model="ir.ui.view">
+        <field name="name">stock.forecast.wizard.form</field>
+        <field name="model">stock.forecast.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <p>
+                    Esta acción buscará todos sus productos almacenables y
+                    creará una línea de previsión para aquellos que no la tengan.
+                </p>
+                <p>
+                    Puede ejecutar esto en cualquier momento para añadir
+                    productos nuevos a la vista de previsión.
+                </p>
+                <footer>
+                    <button name="action_populate_forecast_products" 
+                            string="Poblar Productos" 
+                            type="object" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <menuitem 
+        id="menu_stock_forecast_wizard" 
+        name="Actualizar Lista de Previsión" 
+        parent="purchase.menu_purchase_root" action="action_stock_forecast_wizard"
+        sequence="91"
+    />
+    
+</odoo>

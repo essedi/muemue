@@ -1,63 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Action -->
+    <record id="view_stock_forecast_tree" model="ir.ui.view">
+        <field name="name">stock.forecast.tree</field>
+        <field name="model">stock.forecast</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom" decoration-danger="need_reorder==True">
+                <field name="default_code" string="Referencia" readonly="1"/>
+                <field name="product_name" string="Descripción" readonly="1"/>
+                
+                <field name="months_history" string="Meses Hist."/>
+                
+                <field name="total_sold" string="Ventas" readonly="1"/>
+                <field name="monthly_average" string="Media Mes" readonly="1"/>
+                <field name="current_stock" string="Stock Mano" readonly="1"/>
+                <field name="incoming_stock" string="Stock Entrante" readonly="1"/>
+                <field name="total_available_stock" string="Stock Total" readonly="1"/>
+                <field name="coverage_months" string="Meses Cobertura (Meses2)" readonly="1"/>
+                <field name="need_reorder" string="¿Pedir?" readonly="1" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
     <record id="action_stock_forecast" model="ir.actions.act_window">
         <field name="name">Previsión de Stock</field>
         <field name="res_model">stock.forecast</field>
         <field name="view_mode">tree</field>
         <field name="target">current</field>
-        <field name="context">{'search_default_group_by_product':1}</field>
+        <field name="context">{}</field>
     </record>
 
-    <!-- Menús -->
     <menuitem 
-        id="menu_muemue_main" 
-        name="Muemue" 
-        sequence="10"
-    />
-    
-    <menuitem 
-        id="menu_muemue_stock_forecast" 
-        name="Prevision de stock" 
-        parent="menu_muemue_main"
-        action="action_stock_forecast"
-        sequence="10"
+        id="menu_stock_forecast_main" 
+        name="Previsión de Stock" 
+        parent="purchase.menu_purchase_root"  action="action_stock_forecast"
+        sequence="90"
     />
 
-    <!-- Vista árbol -->
-    <record id="view_stock_forecast_tree" model="ir.ui.view">
-        <field name="name">stock.forecast.tree</field>
-        <field name="model">stock.forecast</field>
-        <field name="arch" type="xml">
-            <tree decoration-success="need_reorder==False" decoration-warning="need_reorder==True">
-                <field name="product_name" string="Producto"/>
-                <field name="default_code" string="Referencia"/>
-                <field name="total_sold" string="Total Vendido (6 meses)"/>
-                <field name="monthly_average" string="Media Mensual"/>
-                <field name="current_stock" string="Stock Actual"/>
-                <field name="coverage_months" string="Meses de Cobertura"/>
-                <field name="need_reorder" string="Necesita Pedido" invisible="1"/>
-            </tree>
-        </field>
-    </record>
-
-    <!-- Filtros y grupos -->
-    <record id="view_stock_forecast_search" model="ir.ui.view">
-        <field name="name">stock.forecast.search</field>
-        <field name="model">stock.forecast</field>
-        <field name="arch" type="xml">
-            <search>
-                <filter name="need_reorder" string="Necesita Reorden" 
-                        domain="[('need_reorder','=',True)]"/>
-                <filter name="low_stock" string="Stock Bajo (menos de 1 mes)" 
-                        domain="[('coverage_months','<',1)]"/>
-                <filter name="good_stock" string="Stock Bueno (más de 3 meses)" 
-                        domain="[('coverage_months','>',3)]"/>
-                <group expand="0" string="Agrupar por">
-                    <filter name="group_by_product" string="Producto" 
-                            context="{'group_by':'product_name'}"/>
-                </group>
-            </search>
-        </field>
-    </record>
 </odoo>

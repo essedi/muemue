@@ -8,10 +8,11 @@
     'category': 'Inventory',
     'author': 'ESSEDI IT CONSULTING SL',
     'website': 'https://www.essedi.es',
-    'depends': ['base', 'stock', 'sale', 'product'],
+    'depends': ['base', 'stock', 'sale', 'product','purchase'],
     'data': [
         'security/ir.model.access.csv',
         'views/stock_forecast_views.xml',
+        'views/stock_forecast_wizard_views.xml'
     ],
     'demo': [],
     'installable': True,
