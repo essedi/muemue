@@ -1,6 +1,7 @@
-from odoo import models, fields, api
+from odoo import models, fields, api, _ 
 from datetime import datetime, timedelta
 from collections import defaultdict
+from odoo.exceptions import UserError 
 
 class StockForecast(models.Model):
     _name = 'stock.forecast'
@@ -216,3 +217,63 @@ class StockForecast(models.Model):
         """
         self.sudo()._compute_current_stock()
         self.sudo()._compute_incoming_stock()
+        
+
+    
+    def action_launch_order_wizard(self):
+        """
+        Esta es la función que llama la Acción de Servidor "Pedir".
+        Recoge los productos seleccionados y abre el wizard (pop-up).
+        """
+        
+        # 'self' aquí es el conjunto de filas seleccionadas por el usuario
+        if not self:
+            return
+
+        wizard_line_model = self.env['stock.order.wizard.line']
+        wizard_lines = []
+
+        for rec in self:
+            # Solo añadir líneas que necesiten pedirse
+            if not rec.need_reorder:
+                continue
+
+            # Calcular la cantidad a pedir:
+            # (Stock Objetivo) - (Esto es la media de ventas * los meses que se quieren cubrir)
+            target_stock = rec.monthly_average * rec.forecast_months
+            current_and_incoming = rec.total_available_stock
+            quantity_to_order = target_stock - current_and_incoming
+
+            # Si el cálculo es negativo (tenemos de más), no pedimos
+            if quantity_to_order <= 0:
+                continue
+                
+            # Buscar el primer proveedor (defecto) de la lista
+            default_supplier = rec.product_id.seller_ids[:1].partner_id
+
+            line_vals = {
+                'forecast_id': rec.id,
+                'product_id': rec.product_id.id,
+                'quantity_to_order': quantity_to_order,
+                'supplier_id': default_supplier.id if default_supplier else False,
+            }
+            wizard_lines.append((0, 0, line_vals)) # (0, 0, vals) es el formato para crear One2many
+
+        if not wizard_lines:
+            
+            raise UserError(_("Ninguno de los productos seleccionados necesita reposición (o ya está pedido)."))
+
+
+        wizard = self.env['stock.order.wizard'].create({
+            'line_ids': wizard_lines
+        })
+
+        # Esto devuelve una acción para abrir el pop-up
+        return {
+            'name': _('Asistente para Pedir Stock'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'stock.order.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new', # 'new' = abrir en pop-up
+        }

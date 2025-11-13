@@ -52,9 +52,7 @@
         <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">
-# Aqui hay que ponerle la lógica, no hace nada aun.
-# model.action_hacer_pedido()
-pass
+action = records.action_launch_order_wizard()
         </field>
     </record>
 
