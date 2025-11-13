@@ -209,6 +209,20 @@ class StockForecast(models.Model):
                 'search_default_group_by_product': 1,
             }
         }
+    def action_open_poblar_wizard(self):
+        """
+        Esta función es llamada por el nuevo botón "Actualizar Lista de Previsión".
+        No importa qué filas estén seleccionadas, solo abre el wizard.
+        """
+        # Devuelve la acción que abre el wizard de "Poblar"
+        return {
+            'name': _('Poblar Previsión de Stock'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'stock.forecast.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'res_id': False, # No abre un registro, solo el wizard
+        }
 
 
     def action_refresh_stock_data(self):

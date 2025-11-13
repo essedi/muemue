@@ -20,13 +20,13 @@ class StockOrderWizard(models.TransientModel):
         if not self.line_ids:
             raise UserError("No hay líneas para pedir.")
 
-        # Agrupar líneas por proveedor
+        # Agrupa líneas por proveedor
         lines_by_supplier = defaultdict(lambda: self.env['stock.order.wizard.line'])
         for line in self.line_ids:
             if not line.supplier_id:
                 raise UserError(f"Por favor, selecciona un proveedor para el producto '{line.product_id.name}'.")
             if line.quantity_to_order <= 0:
-                continue # Omitir líneas con cantidad 0
+                continue 
             
             lines_by_supplier[line.supplier_id] |= line
 
@@ -40,7 +40,7 @@ class StockOrderWizard(models.TransientModel):
                 'partner_id': supplier.id,
                 'state': 'draft',
                 'date_order': fields.Datetime.now(),
-                # Puedes añadir más valores por defecto aquí
+                #Aqui luego se podrian poner mas valores
             }
             new_po = po_model.create(po_vals)
             created_pos.append(new_po.id)
@@ -79,13 +79,12 @@ class StockOrderWizardLine(models.TransientModel):
     forecast_id = fields.Many2one('stock.forecast', string="Línea de Previsión")
     product_id = fields.Many2one('product.product', string="Producto", readonly=True)
     
-    # Campo "Lista de Proveedores" (se usa para el filtro)
     supplier_info_ids = fields.One2many(
         related='product_id.seller_ids',
         string="Info de Proveedores"
     )
     
-    # Campo "Proveedor" (el que el usuario elige)
+    
     supplier_id = fields.Many2one(
         'res.partner', 
         string="Proveedor", 
@@ -94,7 +93,6 @@ class StockOrderWizardLine(models.TransientModel):
     
     quantity_to_order = fields.Float(string="Cantidad a Pedir", digits='Product Unit of Measure')
 
-    # Campo de ayuda para el filtro (domain) en la vista XML
     supplier_partner_ids = fields.Many2many(
         'res.partner', 
         compute='_compute_supplier_partner_ids',
