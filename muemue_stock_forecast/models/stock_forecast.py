@@ -75,8 +75,12 @@ class StockForecast(models.Model):
     )
     need_reorder = fields.Boolean(
         compute='_compute_coverage_data', 
-        string="¿Pedir?"
+        
     )
+    reorder_warning= fields.Boolean(
+        compute='_compute_coverage_data'
+    )
+
 
     
     @api.depends('current_stock', 'incoming_stock', 'monthly_average', 'forecast_months')
@@ -90,7 +94,11 @@ class StockForecast(models.Model):
                 rec.coverage_months = rec.total_available_stock / rec.monthly_average
             else:
                 rec.coverage_months = 999 if rec.total_available_stock > 0 else 0
+
             rec.need_reorder = rec.coverage_months < rec.forecast_months
+
+            warning_limit = rec.forecast_months + (rec.forecast_months / 2.0)
+            rec.reorder_warning = (rec.coverage_months > rec.forecast_months) and (rec.coverage_months <= warning_limit)
 
 
     @api.depends('product_id')

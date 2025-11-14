@@ -4,8 +4,10 @@
         <field name="name">stock.forecast.tree</field>
         <field name="model">stock.forecast</field>
         <field name="arch" type="xml">
-            <tree editable="bottom" decoration-danger="need_reorder==True">
+            <tree editable="bottom" decoration-danger="need_reorder==True"
+            decoration-warning="reorder_warning==True">
                 <field name="need_reorder" readonly="1" column_invisible="True"/>
+                <field name="reorder_warning" readonly="1" column_invisible="True"/>
                 <field name="default_code" string="Referencia" readonly="1"/>
                 <field name="product_name" string="Descripción" readonly="1"/>
                 <field name="months_history" string="Meses Hist."/>
