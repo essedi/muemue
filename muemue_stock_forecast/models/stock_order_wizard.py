@@ -25,9 +25,9 @@ class StockOrderWizard(models.TransientModel):
         for line in self.line_ids:
             if not line.supplier_id:
                 raise UserError(f"Por favor, selecciona un proveedor para el producto '{line.product_id.name}'.")
-            if line.quantity_to_order <= 0:
-                continue 
-            
+            if line.quantity_to_order == 0:
+                line.quantity_to_order=0
+              
             lines_by_supplier[line.supplier_id] |= line
 
         po_model = self.env['purchase.order']

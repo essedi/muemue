@@ -2,6 +2,8 @@ from odoo import models, fields, api, _
 from datetime import datetime, timedelta
 from collections import defaultdict
 from odoo.exceptions import UserError 
+import logging
+_logger = logging.getLogger(__name__)
 
 class StockForecast(models.Model):
     _name = 'stock.forecast'
@@ -178,6 +180,8 @@ class StockForecast(models.Model):
                 continue
             end_date = datetime.now()
             start_date = end_date - timedelta(days=rec.months_history * 30.44)
+
+            _logger.debug("start_date %s end_date %s",start_date, end_date)
             sale_lines = self.env['sale.order.line'].search([
                 ('order_id.date_order', '>=', start_date),
                 ('order_id.date_order', '<=', end_date),
@@ -248,9 +252,7 @@ class StockForecast(models.Model):
         wizard_lines = []
 
         for rec in self:
-            # Solo añadir líneas que necesiten pedirse
-            if not rec.need_reorder:
-                continue
+       
 
             # Calcular la cantidad a pedir:
             # (Stock Objetivo) - (Esto es la media de ventas * los meses que se quieren cubrir)
@@ -260,7 +262,7 @@ class StockForecast(models.Model):
 
             # Si el cálculo es negativo (tenemos de más), no pedimos
             if quantity_to_order <= 0:
-                continue
+                quantity_to_order=0
                 
             # Buscar el primer proveedor (defecto) de la lista
             default_supplier = rec.product_id.seller_ids[:1].partner_id

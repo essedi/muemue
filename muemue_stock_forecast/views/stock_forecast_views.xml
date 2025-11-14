@@ -5,16 +5,6 @@
         <field name="model">stock.forecast</field>
         <field name="arch" type="xml">
             <tree editable="bottom" decoration-danger="need_reorder==True">
-                
-                <header>
-                    <button 
-                        name="%(muemue_stock_forecast.action_stock_forecast_wizard)d" 
-                        string="Actualizar Lista de Previsión" 
-                        type="action" 
-                        class="btn-primary"
-                    />
-                </header>
-                
                 <field name="need_reorder" readonly="1" column_invisible="True"/>
                 <field name="default_code" string="Referencia" readonly="1"/>
                 <field name="product_name" string="Descripción" readonly="1"/>

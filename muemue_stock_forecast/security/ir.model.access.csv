@@ -1,5 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_stock_forecast_user,stock.forecast.user,model_stock_forecast,base.group_user,1,1,1,1
-access_stock_forecast_wizard_user,stock.forecast.wizard.user,model_stock_forecast_wizard,base.group_user,1,1,1,1
 access_stock_order_wizard,stock.order.wizard.user,model_stock_order_wizard,base.group_user,1,1,1,1
 access_stock_order_wizard_line,stock.order.wizard.line.user,model_stock_order_wizard_line,base.group_user,1,1,1,1
