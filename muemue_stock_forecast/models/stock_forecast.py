@@ -43,43 +43,51 @@ class StockForecast(models.Model):
     current_stock = fields.Float(
         compute='_compute_current_stock', 
         string="Stock Mano",
-        help="Stock actual en ubicaciones internas."
+        help="Stock actual en ubicaciones internas.",
+        store=True
     )
     incoming_stock = fields.Float(
         compute='_compute_incoming_stock', 
         string="Stock Entrante",
-        help="Stock de pedidos de compra en camino DENTRO del período de previsión."
+        help="Stock de pedidos de compra en camino DENTRO del período de previsión.",
+        store=True
     )
 
     
     total_sold = fields.Float(
         compute='_compute_sales_data', 
         string="Ventas",
-        help="Total de unidades vendidas en el período."
+        help="Total de unidades vendidas en el período.",
+        store= True
     )
     monthly_average = fields.Float(
         compute='_compute_sales_data', 
         string="Media Mes", 
-        digits=(12, 2)
+        digits=(12, 2),
+        store =True
     )
 
     
     total_available_stock = fields.Float(
         compute='_compute_coverage_data',
         string="Stock Total",
-        help="Stock Mano + Stock Entrante"
+        help="Stock Mano + Stock Entrante",
+        store =True
     )
     coverage_months = fields.Float(
         compute='_compute_coverage_data', 
         string="Meses Cobertura (Meses2)", 
-        digits=(12, 2)
+        digits=(12, 2),
+        store=True
     )
     need_reorder = fields.Boolean(
         compute='_compute_coverage_data', 
+        store=True
         
     )
     reorder_warning= fields.Boolean(
-        compute='_compute_coverage_data'
+        compute='_compute_coverage_data',
+        store=True
     )
 
 
@@ -96,7 +104,7 @@ class StockForecast(models.Model):
             else:
                 rec.coverage_months = 999 if rec.total_available_stock > 0 else 0
 
-            rec.need_reorder = rec.coverage_months < rec.forecast_months
+            rec.need_reorder = rec.coverage_months < rec.forecast_months and rec.total_sold > 0 
 
             warning_limit = rec.forecast_months + (rec.forecast_months / 2.0)
             rec.reorder_warning = (rec.coverage_months > rec.forecast_months) and (rec.coverage_months <= warning_limit)

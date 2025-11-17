@@ -28,6 +28,28 @@
             </tree>
         </field>
     </record>
+    <record id="view_stock_forecast_search" model="ir.ui.view">
+        <field name="name">stock.forecast.search</field>
+        <field name="model">stock.forecast</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Previsión">
+                
+                <field name="product_name" string="Producto"/>
+                <field name="default_code" string="Referencia"/>
+                
+                <separator/>
+                
+                <filter name="filter_need_reorder"
+                        string=" Necesita Pedir (Rojo)"
+                        domain="[('need_reorder', '=', True)]"/>
+                        
+                <filter name="filter_reorder_warning"
+                        string="Cerca del limite de Stock (Amarillo)"
+                        domain="[('reorder_warning', '=', True)]"/>
+                
+            </search>
+        </field>
+    </record>
 
     <record id="action_stock_forecast" model="ir.actions.act_window">
         <field name="name">Previsión de Stock</field>
