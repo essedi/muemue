@@ -47,11 +47,23 @@ class StockOrderWizard(models.TransientModel):
 
             # Crear las líneas del Pedido de Compra
             for line in lines:
+                product = line.product_id
+                supplier = line.supplier_id
+                  
+                  #seller_ids devuelve una lista de product.supplierinfo, en este tipo de objeto estan las propiedades del supplier
+
+                  #aqui se escoge el product.supplierinfo del proveedor 
+                seller_info = product.seller_ids.filtered(
+                    lambda s: s.partner_id.id == supplier.id
+                )
+                unit_price= 0.0
+                if seller_info:
+                    unit_price=seller_info[0].price
                 po_line_vals = {
                     'order_id': new_po.id,
                     'product_id': line.product_id.id,
                     'product_qty': line.quantity_to_order,
-                    'price_unit': 0, # Odoo lo tomará del proveedor
+                    'price_unit': unit_price,
                     'date_planned': fields.Date.today(),
                     'name': line.product_id.display_name,
                     'product_uom': line.product_id.uom_po_id.id or line.product_id.uom_id.id,
