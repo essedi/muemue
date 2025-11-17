@@ -1,3 +1,4 @@
+import math
 from odoo import models, fields, api, _ 
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -266,7 +267,7 @@ class StockForecast(models.Model):
             # (Stock Objetivo) - (Esto es la media de ventas * los meses que se quieren cubrir)
             target_stock = rec.monthly_average * rec.forecast_months
             current_and_incoming = rec.total_available_stock
-            quantity_to_order = target_stock - current_and_incoming
+            quantity_to_order = math.ceil(target_stock - current_and_incoming)
 
             # Si el cálculo es negativo (tenemos de más), no pedimos
             if quantity_to_order <= 0:
@@ -275,13 +276,14 @@ class StockForecast(models.Model):
             # Buscar el primer proveedor (defecto) de la lista
             default_supplier = rec.product_id.seller_ids[:1].partner_id
 
-            line_vals = {
-                'forecast_id': rec.id,
-                'product_id': rec.product_id.id,
-                'quantity_to_order': quantity_to_order,
-                'supplier_id': default_supplier.id if default_supplier else False,
-            }
-            wizard_lines.append((0, 0, line_vals)) # (0, 0, vals) es el formato para crear One2many
+            if default_supplier:
+                line_vals = {
+                    'forecast_id': rec.id,
+                    'product_id': rec.product_id.id,
+                    'quantity_to_order': quantity_to_order,
+                    'supplier_id': default_supplier.id if default_supplier else False,
+                }
+                wizard_lines.append((0, 0, line_vals)) # (0, 0, vals) es el formato para crear One2many
 
         if not wizard_lines:
             

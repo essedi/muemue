@@ -90,6 +90,7 @@ class StockOrderWizardLine(models.TransientModel):
     wizard_id = fields.Many2one('stock.order.wizard')
     forecast_id = fields.Many2one('stock.forecast', string="Línea de Previsión")
     product_id = fields.Many2one('product.product', string="Producto", readonly=True)
+
     
     supplier_info_ids = fields.One2many(
         related='product_id.seller_ids',
@@ -101,6 +102,13 @@ class StockOrderWizardLine(models.TransientModel):
         'res.partner', 
         string="Proveedor", 
         required=True
+    )
+
+    unit_price = fields.Float(
+        string="Precio Unitario", 
+        compute='_compute_unit_price',
+        digits='Product Price', 
+        readonly=True
     )
     
     quantity_to_order = fields.Float(string="Cantidad a Pedir", digits='Product Unit of Measure')
@@ -115,3 +123,28 @@ class StockOrderWizardLine(models.TransientModel):
     def _compute_supplier_partner_ids(self):
         for line in self:
             line.supplier_partner_ids = line.product_id.seller_ids.partner_id
+    
+
+    @api.depends('supplier_id', 'product_id')
+    def _compute_unit_price(self):
+        """
+        Calcula el precio unitario basado en el producto y el proveedor seleccionado.
+        """
+        for line in self:
+            if not line.product_id or not line.supplier_id:
+                line.unit_price = 0.0
+                continue
+
+            product = line.product_id # Esto es un 'product.product'
+            supplier = line.supplier_id # Esto es un 'res.partner'
+
+            seller_info = self.env['product.supplierinfo'].search([
+                ('product_tmpl_id', '=', product.product_tmpl_id.id),
+                ('partner_id', '=', supplier.id)
+            ], limit=1)
+            
+            if seller_info:
+                line.unit_price = seller_info.price
+            else:
+                # Si no encuentra nada, pone 0.0
+                line.unit_price = 0.0

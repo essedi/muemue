@@ -19,6 +19,8 @@
                                string="Proveedor"
                                domain="[('id', 'in', supplier_partner_ids)]"
                                options="{'no_create': True, 'no_open': True}"/>
+
+                         <field name="unit_price" string="Precio" readonly="1"/>
                         
                         <field name="quantity_to_order" string="Cantidad a Pedir"/>
                     </tree>
