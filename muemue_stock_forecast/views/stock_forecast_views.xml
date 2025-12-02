@@ -36,6 +36,8 @@
                 
                 <field name="product_name" string="Producto"/>
                 <field name="default_code" string="Referencia"/>
+                <field name="product_id" string="Proveedor" 
+                       filter_domain="[('product_id.seller_ids.partner_id.name', 'ilike', self)]"/>
                 
                 <separator/>
                 
@@ -50,6 +52,8 @@
             </search>
         </field>
     </record>
+    
+    
 
     <record id="action_stock_forecast" model="ir.actions.act_window">
         <field name="name">Previsión de Stock</field>

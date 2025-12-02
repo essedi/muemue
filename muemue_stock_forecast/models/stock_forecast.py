@@ -216,7 +216,7 @@ class StockForecast(models.Model):
         self.ensure_one() 
         
         domain = self._get_incoming_stock_domain()
-        
+       # view_id = self.env.ref('muemue_stock_forecast.view_stock_move_tree_forecast').id
         
         return {
             'name': 'Movimientos Entrantes Previstos',
@@ -225,6 +225,8 @@ class StockForecast(models.Model):
             'view_mode': 'tree,form', 
             'target': 'new', 
             'domain': domain, 
+            #'view_id': view_id,
+          
             'context': {
                 'search_default_group_by_picking': 1, # Agrupa por Albarán/Recepción
                 'search_default_group_by_product': 1,
@@ -252,6 +254,8 @@ class StockForecast(models.Model):
         """
         self.sudo()._compute_current_stock()
         self.sudo()._compute_incoming_stock()
+        self.sudo()._compute_sales_data()
+
         
 
     
