@@ -10,6 +10,7 @@
                 <field name="reorder_warning" readonly="1" column_invisible="True"/>
                 <field name="default_code" string="Referencia" readonly="1"/>
                 <field name="product_name" string="Descripción" readonly="1"/>
+                <field name="vendor_ids" string="Proveedores" widget="many2many_tags" readonly="1" optional="show"/>
                 <field name="months_history" string="Meses Hist."/>
                 <field name="total_sold" string="Ventas" readonly="1"/>
                 <field name="monthly_average" string="Media Mes" readonly="1"/>
@@ -36,8 +37,8 @@
                 
                 <field name="product_name" string="Producto"/>
                 <field name="default_code" string="Referencia"/>
-                <field name="product_id" string="Proveedor" 
-                       filter_domain="[('product_id.seller_ids.partner_id.name', 'ilike', self)]"/>
+                <field name="vendor_ids" string="Buscar por Proveedor" widget="many2many_tags"/>
+              
                 
                 <separator/>
                 
@@ -48,6 +49,12 @@
                 <filter name="filter_reorder_warning"
                         string="Cerca del limite de Stock (Amarillo)"
                         domain="[('reorder_warning', '=', True)]"/>
+
+                <group expand="0" string="Agrupar Por">
+                    <filter string="Proveedor" name="group_vendor" context="{'group_by': 'vendor_ids'}"/>
+                </group>
+
+                        
                 
             </search>
         </field>

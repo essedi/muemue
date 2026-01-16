@@ -89,6 +89,12 @@ class StockForecast(models.Model):
         compute='_compute_coverage_data',
         store=True
     )
+    vendor_ids= fields.Many2many(
+        comodel_name='res.partner',
+        string='Proveedores',
+        compute='_compute_vendor_ids',
+        store=True,
+        readonly=True)
 
 
     
@@ -209,6 +215,15 @@ class StockForecast(models.Model):
             rec.total_sold = total_sold
             rec.monthly_average = total_sold / rec.months_history if rec.months_history > 0 else 0
 
+    @api.depends('product_id','product_id.seller_ids')
+    def _compute_vendor_ids(self):
+        for record in self:
+            if record.product_id.seller_ids:
+                record.vendor_ids = record.product_id.seller_ids.mapped('partner_id')
+            else:
+                record.vendor_ids= False
+    
+
     
     # funcion del boton de la derecha de Stock Entrante
     def action_view_incoming_stock_moves(self):
@@ -255,6 +270,7 @@ class StockForecast(models.Model):
         self.sudo()._compute_current_stock()
         self.sudo()._compute_incoming_stock()
         self.sudo()._compute_sales_data()
+        
 
         
 
